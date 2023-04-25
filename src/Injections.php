@@ -33,7 +33,7 @@ class Injections
 
     if ( null !== $injections ) {
 
-	  if ( is_object( $injections ) ) {
+      if ( is_object( $injections ) ) {
 
         if ( ! $injections instanceof Injections ) {
           throw new Exception( 'Input to injections must be an array or an injections instance' );          
