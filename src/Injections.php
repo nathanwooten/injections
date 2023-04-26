@@ -33,11 +33,12 @@ class Injections
 
     if ( null !== $injections ) {
 
-      if ( is_object( $injections ) ) {
+	  if ( is_object( $injections ) ) {
 
         if ( ! $injections instanceof Injections ) {
           throw new Exception( 'Input to injections must be an array or an injections instance' );          
         }
+
         $injections->inject( $this );
       } else {
 
@@ -68,14 +69,19 @@ class Injections
   {
 
     if ( ! is_object( $object ) ) {
-      $object = $this->applyConstructor( $object );
+      $object = $this->injectOne( $object, 'method', '__construct' );
     }
 
     $this->addMany( 'property', $this->property, $condition );
     $this->addMany( 'method', $this->method, $condition );
 
-    $object = $this->injectMany( $object, 'property', array_keys( $this->property ), $condition );
-    $object = $this->injectMany( $object, 'method', array_keys( $this->method ), $condition );
+    $properties = array_keys( $this->property );
+    $methods = array_keys( $this->method );
+
+    unset( $methods[ '__construct' ] );
+
+    $this->injectMany( $object, 'property', $properties, $condition );
+    $this->injectMany( $object, 'method', $methods, $condition );
 
     return $object;
 
@@ -117,7 +123,7 @@ class Injections
       $obj = $this->applyConstructor( $obj );
     } else {
       if ( 'method' === $injector && '__construct' === $name ) {
-        throw new Exception( 'Can\'t use constructor injection on an existing object' );
+        return $this;
       }
     }
 
@@ -222,8 +228,8 @@ class Injections
 
       if ( is_string( $class ) && class_exists( $class ) ) {
 
-        if ( isset( $this->method[ '__constructor' ] ) ) {
-          $args = $this->method[ '__constructor' ];
+        if ( isset( $this->method[ '__construct' ] ) ) {
+          $args = $this->method[ '__construct' ];
         } else {
           $args = [];
         }
